@@ -1,5 +1,5 @@
 
-from lukas_graphics3d import *
+from graphics3d import *
 import math
 import random
 import time

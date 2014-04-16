@@ -2,7 +2,7 @@
 # from lukas_graphics3d import *
 
 
-from lukas_graphics3d import *
+from graphics3d import *
 
 makeGraphicsWindow(800, 600)
 
