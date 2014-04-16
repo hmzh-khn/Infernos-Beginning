@@ -181,10 +181,10 @@ class terrain_piece:
     def __init__(self,low_res_coordinate_heights,grid_spacing):
         self.has_high_res_model = False
         self.high_res_model = None
-        self.low_res_model = Terrain3D(low_res_coordinate_heights,grid_spacing,texture="ground texture night.png",textureRepeat=16)
+        self.low_res_model = Terrain3D(low_res_coordinate_heights,grid_spacing,texture="img/ground texture night.png",textureRepeat=16)
 
     def load_high_res(self,coordinate_heights):
-        self.high_res_model = Terrain3D(coordinate_heights,DRAW_GRID_SPACING,texture="ground texture night.png",textureRepeat=16)
+        self.high_res_model = Terrain3D(coordinate_heights,DRAW_GRID_SPACING,texture="img/ground texture night.png",textureRepeat=16)
         self.has_high_res_model = True
 
 def load_high_res_terrain(world):
@@ -209,7 +209,7 @@ def startWorld(world):
     world.current_state = "loading"
     world.loading = 0
 
-    world.skydome = Sphere3D(3000, 8, texture="skydome night.jpg")
+    world.skydome = Sphere3D(3000, 8, texture="img/skydome night.jpg")
     
     #the angles you are facing
     world.angleX = 0 #up - down
