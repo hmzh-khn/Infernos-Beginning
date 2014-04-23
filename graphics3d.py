@@ -2542,6 +2542,7 @@ class Lines3D(Shape3D):
 ##        self.countPolygons(self.numVertices/3)
 
 class Terrain3D(Shape3D):
+    # heights = 2d list of heights
     def __init__(self, heights, cellSize=1, colors=["black","white"], texture=None, textureRepeat=1):
         Shape3D.__init__(self)
         self.heights = heights
