@@ -7,6 +7,8 @@ makeGraphicsWindow(800, 600)
 PEAK_HEIGHT = 6
 HEIGHT_DROP = 0.5
 MOUNTAIN_LAYERS = 10
+SCALE = 5
+HALF_DIMENSION = SCALE*DIMENSION
 
 currentLayer = MOUNTAIN_LAYERS # for developer use
 
@@ -31,7 +33,7 @@ def initStructures(world, heights):
 			currentPos = (listNum,index)
 
 			# trees
-			if( isBoundedBy( currentPos,(3,5),(6,8) )):
+			if isBoundedBy( currentPos,(3,5),(6,8) ):
 				heights[listNum][index] = 3
 
 			# mountain
@@ -132,19 +134,25 @@ def getSurroundingPositions(world, pos):
 	return surrounding_positions
 
 def updateWorld(world):
-	
-	camera_pos = getCameraPosition()
-
-
 # forward movement >
 	movement_speed = 0
 	
 	if(keyPressedNow( pygame.K_UP )):
-		movement_speed = 1
+		movement_speed = 0.1
+
 	if(keyPressedNow( pygame.K_DOWN )):
-		movement_speed = -1
+		movement_speed = -0.1
 
 	moveCameraForward(movement_speed, True)
+	camera_pos = (camX,camY,camZ) = getCameraPosition()
+
+	# if camX < HALF_DIMENSION:
+	# 	camX = camX+25
+
+	# adjust the height
+	new_height = current_height(world, camera_pos)# (camX+25,camY,camZ-25))
+
+	setCameraPosition(camX,new_height,camZ)
 
 # angled movement >
 	rotation_angle = 0
@@ -157,10 +165,73 @@ def updateWorld(world):
 	adjustCameraRotation(rotation_angle, 0, 0)
 
 
+def current_height(world,pos):
+	(x,y,z) = pos
+
+	intX = int(round(x))
+	intZ = int(round(z))
+
+	if x-intX >= 0: # then the other corners are above it
+		otherX = intX + 1
+	else: # then the other corners are below it
+		otherX = intX - 1
+
+	if z-intZ >= 0: # then the other corners are above it
+		otherZ = intZ + 1
+	else: # then the other corners are below it
+		otherZ = intZ - 1
+
+	# print x,z
+
+	# x_percentage_done = abs(x-intX)
+	# z_percentage_done = abs(z-intZ)
+	# x_percentage_left = abs(x-otherX)
+	# z_percentage_left = abs(z-otherZ)
+
+	# corner1 = world.height_map[intX]  [intZ]
+	# corner2 = world.height_map[intX]  [otherZ]
+	# corner3 = world.height_map[otherX][intZ]
+	# corner4 = world.height_map[otherX][otherZ]
+
+	# x_diff_1 = corner1*x_percentage_done + corner2*x_percentage_left
+	# x_diff_2 = corner3*x_percentage_done + corner4*x_percentage_left
+
+	# interpolated_height = (x_diff_1*z_percentage_done + x_diff_2*z_percentage_left) + 2
+
+	corner_height_coords = [(intX,intZ),(intX,otherZ),(otherX,intZ),(otherX,otherZ)]
+	corner_heights = [world.height_map[x][z]+2 for (x,z) in corner_height_coords]
+	avg_height = sum(corner_heights)/len(corner_heights)
+
+	# corner_height_coords = [(intX/5,intZ/5),(intX/5,otherZ/5),(otherX/5,intZ/5),(otherX/5,otherZ/5)]
+
+	# x_percentage_done = abs(intX - x)
+	# z_percentage_done = abs(intZ - z)
+	# x_percentage_left = abs(otherX - x)
+	# z_percentage_left = abs(otherZ - z)
+
+	# interpolated_heights = [
+	# 	world.height_map[intX/5]  [intZ/5]   *x_percentage_left *z_percentage_left,
+	# 	world.height_map[intX/5]  [otherZ/5] *x_percentage_left *z_percentage_done,
+	# 	world.height_map[otherX/5][intZ/5]   *x_percentage_done *z_percentage_left,
+	# 	world.height_map[otherX/5][otherZ/5] *x_percentage_done *z_percentage_done
+	# ]
+
+	# print interpolated_heights
+
+	# interpolated_height = -5*(sum(interpolated_heights)/len(interpolated_heights))
+
+
+	# corner_heights = [-5*world.height_map[x][z]+1 for (x,z) in corner_height_coords]
+
+	# avg_height = sum(corner_heights)/len(corner_heights)
+
+
+	return avg_height #interpolated_height
+
 
 
 def drawWorld(world):
-	draw3D(world.terrain, y=1, scale=5) #, anglex=20, angley=20)
+	draw3D(world.terrain,x=-DIMENSION/2,y=0,z=-DIMENSION/2, scale=1) #, anglex=20, angley=20)
 
 runGraphics(startWorld, updateWorld, drawWorld)
 	
