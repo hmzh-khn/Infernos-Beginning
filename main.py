@@ -17,8 +17,8 @@ HALF_DIMENSION = SCALE*DIMENSION
 currentLayer = MOUNTAIN_LAYERS # for developer use
 
 def startWorld(world):
-	setCameraPosition(0,10,0)
-	setCameraRotation(225,0,0)
+	setCameraPosition(20,15,0)
+	setCameraRotation(180,0,0)
 
 	world.lionX = 20
 	world.leopardX = 15
@@ -43,12 +43,17 @@ def startWorld(world):
 	world.sheWolf = Rect3D(2, 2, texture = "img/sheWolf.psd")
 	world.virgil = Rect3D(2, 2, texture = "img/virgil.psd")
 
+	world.trees = []
 	world.trunk = Cylinder3D(5, .75, slices = 6, wedges = 3, texture = "img/bark.jpg")#height, radius
 	world.branches = Cone3D(4, 2.5, slices = 6, wedges = 3, texture = "img/branch.jpg", textureTiles = True)#height, radius
 
 	# setClipRange(1, 1000)
 
-	world.trees = []
+	# gate
+	world.gate_pole_1 = Cylinder3D(5,0.5,texture="img/stone.jpg")
+	world.gate_pole_2 = Cylinder3D(5,0.5,texture="img/stone.jpg")
+	world.gate_top = Box3D(5, texture="img/stone.jpg")
+	world.gate_board = Box3D(3, texture="img/sign.jpg")
 
 	# 2D array of 0's
 	world.height_map = initialHeights 
@@ -56,9 +61,6 @@ def startWorld(world):
 	world.height_map = initStructures(world, initialHeights)			
 
 	world.terrain = Terrain3D(world.height_map, texture="img/ground texture night.png", textureRepeat=10)
-
-
-
 
 # generate heights 2d array
 def initStructures(world, heights):
@@ -71,33 +73,23 @@ def initStructures(world, heights):
 			currentPos = (listNum,index)
 
 			# trees
-			isTreeArea = isBoundedBy( currentPos,(0,0),(18,32) ) or isBoundedBy( currentPos,(25,0),(32,32) )
-			if isTreeArea and random.uniform(0,1) <= 0.1:
+			isTreeArea = isBoundedBy( currentPos,(0,0),(18,32) ) or isBoundedBy( currentPos,(25,0),(32,32) ) or isBoundedBy( currentPos, (32,58),(64,64) ) or isBoundedBy( currentPos,(58,32),(64,64) )
+			isTreeArea = isTreeArea or isBoundedBy( currentPos, (18,0), (25,5)) or isBoundedBy(currentPos, (32,32), (53,53))
+
+			if isTreeArea and random.uniform(0,1) <= 0.33:
 				world.trees.append( Tree(listNum, heights[listNum][index], index, world.trunk, world.branches) )
-				
 
 			# mountain
 			elif( isBoundedBy( currentPos,(15,52),(15,52) ) ):
 				level_height = PEAK_HEIGHT
-
 				heights[listNum][index] = level_height
-
 				heights = create_mountain_ring(world, heights, (listNum,index), level_height - HEIGHT_DROP, MOUNTAIN_LAYERS)
 
-
-
-
-			# valley
 			elif( isBoundedBy( currentPos,(41,5),(65,40) ) ):
 				heights[listNum][index] = 0
 
-			# plain with gates and Charon at the end
 			elif( isBoundedBy( currentPos,(50,50),(54,50) ) ):
-				level_height = -PEAK_HEIGHT
-
-				heights[listNum][index] = level_height
-
-				heights = create_valley_ring(world, heights, (listNum,index), level_height + HEIGHT_DROP, MOUNTAIN_LAYERS)
+				pass
 
 	return heights
 
@@ -174,10 +166,10 @@ def updateWorld(world):
 	movement_speed = 0
 	
 	if(keyPressedNow( pygame.K_UP )):
-		movement_speed = 0.1
+		movement_speed = 0.3
 
 	if(keyPressedNow( pygame.K_DOWN )):
-		movement_speed = -0.1
+		movement_speed = -0.2
 
 	moveCameraForward(movement_speed, True)
 	camera_pos = (camX,camY,camZ) = getCameraPosition()
@@ -295,6 +287,12 @@ def drawWorld(world):
 
 
 
+
+	# gate
+	draw3D(world.gate_pole_1, 58.5, 0, 30, anglex=180)
+	draw3D(world.gate_pole_2, 53.5, 0, 30, anglex=180)
+	draw3D(world.gate_top, 56,3,30)
+	draw3D(world.gate_board, 56,3,31)
 
 runGraphics(startWorld, updateWorld, drawWorld)
 	
