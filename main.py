@@ -20,17 +20,28 @@ def startWorld(world):
 	setCameraPosition(0,10,0)
 	setCameraRotation(225,0,0)
 
-	world.lionX = 0	
-	world.leopardX = 10
-	world.sheWolfX = 20
+	world.lionX = 20
+	world.leopardX = 15
+	world.sheWolfX = 10
+
+	world.lionZ = 45
+	world.leopardZ = 45
+	world.sheWolfZ = 45
+
+	world.drawVirgil = False
+	world.virgilX = 0
+	world.virgilY = 0
+	world.virgilZ = 0
 
 	world.thetaLion = 0
 	world.thetaLeopard = 0
 	world.thetaSheWolf = 0
+	world.thetaVirgil = 0
 
 	world.lion = Rect3D(2, 2, texture = "img/lion.jpg")
 	world.leopard = Rect3D(2, 2, texture = "img/leopard.png")
 	world.sheWolf = Rect3D(2, 2, texture = "img/sheWolf.psd")
+	world.virgil = Rect3D(2, 2, texture = "img/virgil.psd")
 
 	world.trunk = Cylinder3D(5, .75, slices = 6, wedges = 3, texture = "img/bark.jpg")#height, radius
 	world.branches = Cone3D(4, 2.5, slices = 6, wedges = 3, texture = "img/branch.jpg", textureTiles = True)#height, radius
@@ -179,6 +190,19 @@ def updateWorld(world):
 
 	setCameraPosition(camX,new_height,camZ)
 
+	(heading, pitch, roll) = getCameraRotation()
+
+	(virgilX, virgilZ) = polarToCartesian(heading - 20, 6)
+
+	world.virgilX = camX + virgilX
+	world.virgilY = camY
+	world.virgilZ = camZ + virgilZ
+
+	if (new_height > 4 and abs(heading) < 42):
+		world.drawVirgil = True
+
+	##print heading
+
 # angled movement >
 	rotation_angle = 0
 
@@ -187,9 +211,10 @@ def updateWorld(world):
 	if(keyPressedNow( pygame.K_RIGHT )):
 		rotation_angle = -1
 
-	world.thetaLion = math.atan2(-1*(camX - world.lionX), -1*camZ)#math.atan2(-x, -z)
-	world.thetaLeopard = math.atan2(-1*(camX - world.leopardX), -1*camZ)
-	world.thetaSheWolf = math.atan2(-1*(camX - world.sheWolfX), -1*camZ)
+	world.thetaLion = math.atan2(-1*(camX - world.lionX), -1*(camZ - world.lionZ))#math.atan2(-x, -z)
+	world.thetaLeopard = math.atan2(-1*(camX - world.leopardX), -1*(camZ-world.leopardZ))
+	world.thetaSheWolf = math.atan2(-1*(camX - world.sheWolfX), -1*(camZ-world.sheWolfZ))
+	world.thetaVirgil = math.atan2(-1*(camX - world.virgilX), -1*(camZ-world.virgilZ))
 
 	adjustCameraRotation(rotation_angle, 0, 0)
 
@@ -210,7 +235,6 @@ def current_height(world,pos):
 	else: # then the other corners are below it
 		otherZ = intZ - 1
 
-	print x,z
 
 	# x_percentage_done = abs(x-intX)
 	# z_percentage_done = abs(z-intZ)
@@ -263,9 +287,13 @@ def drawWorld(world):
 	for tree in world.trees:
 		tree.draw()
 
-	draw3D(world.lion, world.lionX, world.height_map[world.lionX][40]+1, 40, angley = math.degrees(world.thetaLion), anglez = 0)
-	draw3D(world.leopard, world.leopardX, world.height_map[world.leopardX][40]+1, 40, angley=math.degrees(world.thetaLeopard), anglez=0)
-	draw3D(world.sheWolf, world.sheWolfX, world.height_map[world.sheWolfX][40]+1, 40, angley=math.degrees(world.thetaSheWolf), anglez=0)
+	draw3D(world.lion, world.lionX, world.height_map[world.lionX][40]+3, world.lionZ, angley = math.degrees(world.thetaLion), anglez = 0)
+	draw3D(world.leopard, world.leopardX, world.height_map[world.leopardX][40]+3, world.leopardZ, angley=math.degrees(world.thetaLeopard), anglez=0)
+	draw3D(world.sheWolf, world.sheWolfX, world.height_map[world.sheWolfX][40]+3, world.sheWolfZ, angley=math.degrees(world.thetaSheWolf), anglez=0)
+	if world.drawVirgil:
+		draw3D(world.virgil, world.virgilX, world.virgilY, world.virgilZ, angley = math.degrees(world.thetaVirgil))
+
+
 
 
 runGraphics(startWorld, updateWorld, drawWorld)
