@@ -17,6 +17,9 @@ HALF_DIMENSION = SCALE*DIMENSION
 currentLayer = MOUNTAIN_LAYERS # for developer use
 
 def startWorld(world):
+
+        1st = loadSound("intro.wav")
+        
 	setCameraPosition(0,10,0)
 	setCameraRotation(225,0,0)
 
@@ -171,6 +174,9 @@ def getSurroundingPositions(world, pos):
 
 def updateWorld(world):
 # forward movement >
+
+        playSound(1st)
+        
 	movement_speed = 0
 	
 	if(keyPressedNow( pygame.K_UP )):
