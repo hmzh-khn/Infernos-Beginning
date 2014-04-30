@@ -1,24 +1,20 @@
 from graphics3d import *
 
-makeGraphicsWindow(800, 600)
+import math
+from random import randint
+import time
+import threading
 
-def startWorld(world):
-    world.earth = Sphere3D(3, 36, texture="img/earth.jpg")
-    world.angle = 0.0
-    world.cylinder = Cylinder3D(3,2, colors=["white","red"], wedges=100)
+class Tree:
 
-def updateWorld(world):
-    world.angle += 0.5
+    def __init__(self, x, y, z, trunk, branches):
+        self.trunk = trunk
+        self.branches = branches
+        self.x = x
+        self.y = y
+        self.z = z
 
-def drawWorld(world):
-    draw3D(world.cylinder, z=-15, anglex=world.angle) # x, y, z, rotation angles
-    # draw3D(world.earth, 0, 0, -10, 0, world.angle, 0)
-
-
-
-
-runGraphics(startWorld, updateWorld, drawWorld)
-
-
-def draw_tree():
-	print 'lol'
+    def draw(self):
+        draw3D(self.trunk, self.x, self.y + self.trunk.height/2, self.z)
+        draw3D(self.branches, self.x, self.y + self.trunk.height + self.branches.height/2, self.z, anglex = 180)
+       
