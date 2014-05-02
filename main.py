@@ -255,14 +255,13 @@ def updateWorld(world):
 
 	if(proximity(world.lionX, world.lionZ, camX, camZ, 5)):
 		if (world.playLion):
+			removeFog()
 			playSound(world.lionSound)
 			world.playLion = False
 
 
 	if(world.playLion == False):
 		if (world.drawLeopard == False):
-			removeFog()
-			makeFog()
 			time.sleep(13)
 			world.drawLeopard = True
 
@@ -282,10 +281,6 @@ def updateWorld(world):
 			playSound(world.sheWolfSound)
 			world.playSheWolf = False
 
-
-	if(proximity(world.sheWolfX, world.sheWolfZ, camX, camZ, 5) == False and world.playSheWolf == False):
-		removeFog()
-		makeFog(.3)
 
 
 	
