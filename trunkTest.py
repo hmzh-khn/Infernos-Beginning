@@ -7,7 +7,6 @@ from graphics3d import *
 import math
 from random import randint
 import time
-import threading
 
 makeGraphicsWindow(1024, 768)
 

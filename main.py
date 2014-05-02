@@ -86,8 +86,6 @@ def startWorld(world):
 	world.gate_top = Box3D(5, texture="img/stone.jpg")
 	world.gate_board = Box3D(3, texture="img/hope.jpg")#img/sign.jpg
 
-	world.gate_top = Box3D(5.75, texture="img/stone.jpg")
-	world.gate_board = Box3D(3, texture="img/sign.jpg")
 
 	# 2D array of 0's
 	world.height_map = initialHeights 
