@@ -78,14 +78,16 @@ def startWorld(world):
 	setClipRange(.1, 10000000)
 
 	world.skydome = Sphere3D(3000, 8, texture="img/skydome night.jpg")
+	world.blackout = Rect3D(100,100, colors=["black"])
 
 	# gate
 	world.gate_pole_1 = Cylinder3D(5,0.5,texture="img/stone.jpg")
 	world.gate_pole_2 = Cylinder3D(5,0.5,texture="img/stone.jpg")
-
 	world.gate_top = Box3D(5, texture="img/stone.jpg")
 	world.gate_board = Box3D(3, texture="img/hope.jpg")#img/sign.jpg
 
+	world.sign_pole = Cylinder3D(1,0.2,texture="img/sign.jpg")
+	world.sign_post = Box3D(1,1,1,texture="img/sign.jpg")
 
 	# 2D array of 0's
 	world.height_map = initialHeights 
@@ -318,9 +320,13 @@ def current_height(world,pos):
 
 	# interpolated_height = (x_diff_1*z_percentage_done + x_diff_2*z_percentage_left) + 2
 
-	corner_height_coords = [(intX,intZ),(intX,otherZ),(otherX,intZ),(otherX,otherZ)]
-	corner_heights = [world.height_map[x][z]+1 for (x,z) in corner_height_coords]
-	avg_height = sum(corner_heights)/len(corner_heights)
+	if intX >= DIMENSION or intZ >= DIMENSION or otherZ >= DIMENSION or otherX >= DIMENSION:
+		avg_height = 0
+
+	else:
+		corner_height_coords = [(intX,intZ),(intX,otherZ),(otherX,intZ),(otherX,otherZ)]
+		corner_heights = [world.height_map[x][z]+1 for (x,z) in corner_height_coords]
+		avg_height = sum(corner_heights)/len(corner_heights)
 
 	# corner_height_coords = [(intX/5,intZ/5),(intX/5,otherZ/5),(otherX/5,intZ/5),(otherX/5,otherZ/5)]
 
@@ -367,7 +373,11 @@ def drawWorld(world):
 		draw3D(world.virgil, world.virgilX, world.virgilY, world.virgilZ, angley = math.degrees(world.thetaVirgil))
 
 
+	draw3D(world.sign_pole, 55, 0, 23)
+	draw3D(world.sign_post, 55, 1, 23)
 
+	if isBoundedBy( (CX,CZ), (32,0), (64,20) ):
+		draw3D(world.blackout, CX, CY, CZ-0.11)
 
 	# gate
 	draw3D(world.gate_pole_1, 58.5, 0, 30, anglex=180)
