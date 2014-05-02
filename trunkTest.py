@@ -1,5 +1,6 @@
-#Dante's journey - Joseph H. + Hamzah Khan + Lukas Stracovskey
-#Graphics library made by Andrew Merrill
+# Dante's journey - Joseph Hungate + Hamzah Khan
+# Contributions from Lukas Stracovsky
+# Graphics library made by Andrew Merrill
 
 from graphics3d import *
 

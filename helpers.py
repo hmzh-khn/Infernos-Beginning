@@ -1,4 +1,4 @@
-DIMENSION = 67
+DIMENSION = 64
 
 # create initial map with heights 0
 initialHeights = [[0 for setHeight in range(DIMENSION)] for index in range(DIMENSION)]

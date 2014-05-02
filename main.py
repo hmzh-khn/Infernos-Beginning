@@ -4,6 +4,7 @@ from helpers import *
 from tree import *
 import random
 import math
+import time
 
 makeGraphicsWindow(800, 600)
 
@@ -16,20 +17,44 @@ HALF_DIMENSION = SCALE*DIMENSION
 
 currentLayer = MOUNTAIN_LAYERS # for developer use
 
+
+def proximity(object1X, object1Z, object2X, object2Z, minDistance):
+	distance = math.sqrt(((object1X - object2X)**2 + (object1Z - object2Z)**2))
+	if (distance <= minDistance):
+		return True
+	
+
 def startWorld(world):
 
-        1st = loadSound("intro.wav")
-        
-	setCameraPosition(0,10,0)
-	setCameraRotation(225,0,0)
+	makeFog(.3)
+	
+	world.first = loadSound("audio/intro.wav")
+	world.lionSound = loadSound("audio/lionMono.wav")
+	world.leopardSound = loadSound("audio/leopardMono.wav")
+	world.sheWolfSound = loadSound("audio/sheWolfMono.wav")
+	world.virgilSound = loadSound("audio/virgilMono.wav")
 
-	world.lionX = 20
-	world.leopardX = 15
-	world.sheWolfX = 10
+	world.playLion = True
+	world.playLeopard = True
+	world.playSheWolf = True
+	world.playVirgil = True
+
+	#playSound(world.first)
+
+	world.drawLeopard = False
+	world.drawSheWolf = False
+
+	
+	setCameraPosition(20,15,0)
+	setCameraRotation(180,0,0)
+
+	world.lionX = 24
+	world.leopardX = 21
+	world.sheWolfX = 17
 
 	world.lionZ = 45
-	world.leopardZ = 45
-	world.sheWolfZ = 45
+	world.leopardZ = 48
+	world.sheWolfZ = 55
 
 	world.drawVirgil = False
 	world.virgilX = 0
@@ -46,12 +71,17 @@ def startWorld(world):
 	world.sheWolf = Rect3D(2, 2, texture = "img/sheWolf.psd")
 	world.virgil = Rect3D(2, 2, texture = "img/virgil.psd")
 
+	world.trees = []
 	world.trunk = Cylinder3D(5, .75, slices = 6, wedges = 3, texture = "img/bark.jpg")#height, radius
 	world.branches = Cone3D(4, 2.5, slices = 6, wedges = 3, texture = "img/branch.jpg", textureTiles = True)#height, radius
 
 	# setClipRange(1, 1000)
 
-	world.trees = []
+	# gate
+	world.gate_pole_1 = Cylinder3D(5,0.5,texture="img/stone.jpg")
+	world.gate_pole_2 = Cylinder3D(5,0.5,texture="img/stone.jpg")
+	world.gate_top = Box3D(5, texture="img/stone.jpg")
+	world.gate_board = Box3D(3, texture="img/hope.jpg")#img/sign.jpg
 
 	# 2D array of 0's
 	world.height_map = initialHeights 
@@ -59,9 +89,6 @@ def startWorld(world):
 	world.height_map = initStructures(world, initialHeights)			
 
 	world.terrain = Terrain3D(world.height_map, texture="img/ground texture night.png", textureRepeat=10)
-
-
-
 
 # generate heights 2d array
 def initStructures(world, heights):
@@ -74,33 +101,23 @@ def initStructures(world, heights):
 			currentPos = (listNum,index)
 
 			# trees
-			isTreeArea = isBoundedBy( currentPos,(0,0),(18,32) ) or isBoundedBy( currentPos,(25,0),(32,32) )
-			if isTreeArea and random.uniform(0,1) <= 0.1:
+			isTreeArea = isBoundedBy( currentPos,(0,0),(18,32) ) or isBoundedBy( currentPos,(25,0),(32,32) ) or isBoundedBy( currentPos, (32,58),(64,64) ) or isBoundedBy( currentPos,(58,32),(64,64) )
+			isTreeArea = isTreeArea or isBoundedBy( currentPos, (18,0), (25,5)) or isBoundedBy(currentPos, (32,32), (53,53))
+
+			if isTreeArea and random.uniform(0,1) <= 0.33:
 				world.trees.append( Tree(listNum, heights[listNum][index], index, world.trunk, world.branches) )
-				
 
 			# mountain
 			elif( isBoundedBy( currentPos,(15,52),(15,52) ) ):
 				level_height = PEAK_HEIGHT
-
 				heights[listNum][index] = level_height
-
 				heights = create_mountain_ring(world, heights, (listNum,index), level_height - HEIGHT_DROP, MOUNTAIN_LAYERS)
 
-
-
-
-			# valley
 			elif( isBoundedBy( currentPos,(41,5),(65,40) ) ):
 				heights[listNum][index] = 0
 
-			# plain with gates and Charon at the end
 			elif( isBoundedBy( currentPos,(50,50),(54,50) ) ):
-				level_height = -PEAK_HEIGHT
-
-				heights[listNum][index] = level_height
-
-				heights = create_valley_ring(world, heights, (listNum,index), level_height + HEIGHT_DROP, MOUNTAIN_LAYERS)
+				pass
 
 	return heights
 
@@ -175,15 +192,15 @@ def getSurroundingPositions(world, pos):
 def updateWorld(world):
 # forward movement >
 
-        playSound(1st)
-        
+	
+	
 	movement_speed = 0
 	
 	if(keyPressedNow( pygame.K_UP )):
-		movement_speed = 0.1
+		movement_speed = 1.6
 
 	if(keyPressedNow( pygame.K_DOWN )):
-		movement_speed = -0.1
+		movement_speed = -1.2
 
 	moveCameraForward(movement_speed, True)
 	camera_pos = (camX,camY,camZ) = getCameraPosition()
@@ -206,6 +223,11 @@ def updateWorld(world):
 
 	if (new_height > 4 and abs(heading) < 42):
 		world.drawVirgil = True
+		if (world.playVirgil):
+			removeFog()
+			makeFog()
+			playSound(world.virgilSound)
+			world.playVirgil = False
 
 	##print heading
 
@@ -213,9 +235,13 @@ def updateWorld(world):
 	rotation_angle = 0
 
 	if(keyPressedNow( pygame.K_LEFT )):
-		rotation_angle = 1	
+		rotation_angle = 3	
 	if(keyPressedNow( pygame.K_RIGHT )):
-		rotation_angle = -1
+		rotation_angle = -3
+	if isKeyPressed(pygame.K_i):
+	    adjustCameraRotation(0, 3, 0)
+	if isKeyPressed(pygame.K_k):
+	    adjustCameraRotation(0, -3, 0)
 
 	world.thetaLion = math.atan2(-1*(camX - world.lionX), -1*(camZ - world.lionZ))#math.atan2(-x, -z)
 	world.thetaLeopard = math.atan2(-1*(camX - world.leopardX), -1*(camZ-world.leopardZ))
@@ -223,6 +249,44 @@ def updateWorld(world):
 	world.thetaVirgil = math.atan2(-1*(camX - world.virgilX), -1*(camZ-world.virgilZ))
 
 	adjustCameraRotation(rotation_angle, 0, 0)
+
+	if(proximity(world.lionX, world.lionZ, camX, camZ, 5)):
+		if (world.playLion):
+			playSound(world.lionSound)
+			world.playLion = False
+
+
+	if(world.playLion == False):
+		if (world.drawLeopard == False):
+			removeFog()
+			makeFog()
+			time.sleep(13)
+			world.drawLeopard = True
+
+	if(world.playLeopard == False):
+		if (world.drawSheWolf == False):
+			time.sleep(9)
+			world.drawSheWolf = True
+
+
+	if(proximity(world.leopardX, world.leopardZ, camX, camZ, 5)):
+		if (world.playLeopard):
+			playSound(world.leopardSound)
+			world.playLeopard = False
+
+	if(proximity(world.sheWolfX, world.sheWolfZ, camX, camZ, 5)):
+		if (world.playSheWolf):
+			playSound(world.sheWolfSound)
+			world.playSheWolf = False
+
+
+	if(proximity(world.sheWolfX, world.sheWolfZ, camX, camZ, 5) == False and world.playSheWolf == False):
+		removeFog()
+		makeFog(.3)
+
+
+
+	
 
 
 def current_height(world,pos):
@@ -288,19 +352,28 @@ def current_height(world,pos):
 	return avg_height #interpolated_height
 
 def drawWorld(world):
+	
 	draw3D(world.terrain,x=DIMENSION/2,y=0,z=DIMENSION/2, scale=1) #, anglex=20, angley=20)
 
 	for tree in world.trees:
 		tree.draw()
 
-	draw3D(world.lion, world.lionX, world.height_map[world.lionX][40]+3, world.lionZ, angley = math.degrees(world.thetaLion), anglez = 0)
-	draw3D(world.leopard, world.leopardX, world.height_map[world.leopardX][40]+3, world.leopardZ, angley=math.degrees(world.thetaLeopard), anglez=0)
-	draw3D(world.sheWolf, world.sheWolfX, world.height_map[world.sheWolfX][40]+3, world.sheWolfZ, angley=math.degrees(world.thetaSheWolf), anglez=0)
+	draw3D(world.lion, world.lionX, world.height_map[world.lionX][40]+2, world.lionZ, angley = math.degrees(world.thetaLion), anglez = 0)
+	if (world.drawLeopard):
+		draw3D(world.leopard, world.leopardX, world.height_map[world.leopardX][40]+4, world.leopardZ, angley=math.degrees(world.thetaLeopard), anglez=0)
+	if (world.drawSheWolf):               
+		draw3D(world.sheWolf, world.sheWolfX, world.height_map[world.sheWolfX][40]+6, world.sheWolfZ, angley=math.degrees(world.thetaSheWolf), anglez=0)
 	if world.drawVirgil:
 		draw3D(world.virgil, world.virgilX, world.virgilY, world.virgilZ, angley = math.degrees(world.thetaVirgil))
 
 
 
+
+	# gate
+	draw3D(world.gate_pole_1, 58.5, 0, 30, anglex=180)
+	draw3D(world.gate_pole_2, 53.5, 0, 30, anglex=180)
+	draw3D(world.gate_top, 56,3,30)
+	draw3D(world.gate_board, 56,3,31)
 
 runGraphics(startWorld, updateWorld, drawWorld)
 	
