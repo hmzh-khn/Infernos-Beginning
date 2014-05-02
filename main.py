@@ -47,12 +47,14 @@ def startWorld(world):
 	world.trunk = Cylinder3D(5, .75, slices = 6, wedges = 3, texture = "img/bark.jpg")#height, radius
 	world.branches = Cone3D(4, 2.5, slices = 6, wedges = 3, texture = "img/branch.jpg", textureTiles = True)#height, radius
 
-	# setClipRange(1, 1000)
+	setClipRange(.1, 10000000)
+
+	world.skydome = Sphere3D(3000, 8, texture="img/skydome night.jpg")
 
 	# gate
 	world.gate_pole_1 = Cylinder3D(5,0.5,texture="img/stone.jpg")
 	world.gate_pole_2 = Cylinder3D(5,0.5,texture="img/stone.jpg")
-	world.gate_top = Box3D(5, texture="img/stone.jpg")
+	world.gate_top = Box3D(5.75, texture="img/stone.jpg")
 	world.gate_board = Box3D(3, texture="img/sign.jpg")
 
 	# 2D array of 0's
@@ -275,6 +277,9 @@ def current_height(world,pos):
 
 def drawWorld(world):
 	draw3D(world.terrain,x=DIMENSION/2,y=0,z=DIMENSION/2, scale=1) #, anglex=20, angley=20)
+
+	(CX,CY,CZ) = getCameraPosition()
+	draw3D(world.skydome, CX, CY-500, CZ)
 
 	for tree in world.trees:
 		tree.draw()
