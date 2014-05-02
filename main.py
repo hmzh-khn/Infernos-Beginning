@@ -219,17 +219,16 @@ def updateWorld(world):
 
 	(heading, pitch, roll) = getCameraRotation()
 
-	(virgilX, virgilZ) = polarToCartesian(heading - 20, 6)
+	(virgilX, virgilZ) = polarToCartesian(heading - 5, 6)
 
 	world.virgilX = camX + virgilX
 	world.virgilY = camY
 	world.virgilZ = camZ + virgilZ
 
-	if (new_height > 4 and abs(heading) < 42):
+
+	if (proximity(36, 55, camX, camZ, 5)):
 		world.drawVirgil = True
 		if (world.playVirgil):
-			removeFog()
-			makeFog()
 			playSound(world.virgilSound)
 			world.playVirgil = False
 
@@ -287,7 +286,6 @@ def updateWorld(world):
 	if(proximity(world.sheWolfX, world.sheWolfZ, camX, camZ, 5) == False and world.playSheWolf == False):
 		removeFog()
 		makeFog(.3)
-
 
 
 	
